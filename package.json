@@ -1,0 +1,13 @@
+{
+  "name": "snake-ai-neural-dashboard",
+  "version": "1.0.0",
+  "description": "Autonomous Snake Game powered by Deep Q-Learning with live Neural Network and Weight Matrix Visualization",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "train": "node scripts/train.js"
+  },
+  "keywords": ["neural-network", "reinforcement-learning", "dqn", "snake", "visualization"],
+  "license": "MIT"
+}
+

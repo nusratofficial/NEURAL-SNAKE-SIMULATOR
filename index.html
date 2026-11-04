@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neural Snake // Deep Q-Learning Laboratory</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐍</text></svg>">
+</head>
+<body>
+
+  <!-- Top Cyber Command Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">Ψ</div>
+      <div class="brand-text">
+        <h1>NEURAL SNAKE // RL LAB</h1>
+        <p>DEEP Q-LEARNING &bull; SYNAPTIC WEIGHT INSPECTOR</p>
+      </div>
+    </div>
+
+    <div class="header-stats">
+      <div class="status-badge">
+        <span class="dot"></span>
+        <span id="statusBadgeText">RL RUNNING</span>
+      </div>
+
+      <div class="stat-pill">
+        <span class="label">Episodes</span>
+        <span class="val" id="statEpisode">0</span>
+      </div>
+
+      <div class="stat-pill">
+        <span class="label">High Score</span>
+        <span class="val" id="statHighScore" style="color: var(--neon-yellow);">0</span>
+      </div>
+
+      <div class="stat-pill">
+        <span class="label">FPS</span>
+        <span class="val" id="statFps" style="color: var(--neon-green);">60</span>
+      </div>
+
+      <button id="btnAudio" class="btn-icon" title="Toggle Sound">🔊 SOUND</button>
+    </div>
+  </header>
+
+  <!-- Main Dashboard Grid -->
+  <main class="dashboard-grid">
+
+    <!-- Left Column: Snake Game & Tactical HUD -->
+    <section class="card game-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>🎮</span> NEURAL AGENT SIMULATION
+        </div>
+      </div>
+
+      <!-- Canvas -->
+      <div class="canvas-wrapper">
+        <canvas id="gameCanvas"></canvas>
+      </div>
+
+      <!-- Real-time Action & Policy Decision Readout -->
+      <div class="action-hud">
+        <div>
+          <span class="tag">OUTPUT DECISION: </span>
+          <span class="val-action" id="hudAction">GO STRAIGHT</span>
+        </div>
+        <div>
+          <span class="tag">POLICY: </span>
+          <span class="val-mode exploit" id="hudMode">EXPLOIT</span>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="game-hud-overlay">
+        <div class="hud-item">
+          <div class="lbl">Current Score</div>
+          <div class="val" id="statScore">0</div>
+        </div>
+        <div class="hud-item">
+          <div class="lbl">Length</div>
+          <div class="val" id="statLength" style="color: var(--neon-cyan);">3</div>
+        </div>
+        <div class="hud-item">
+          <div class="lbl">Steps Alive</div>
+          <div class="val" id="statSteps" style="color: var(--neon-purple);">0</div>
+        </div>
+        <div class="hud-item">
+          <div class="lbl">Loss (MSE)</div>
+          <div class="val" id="statLoss" style="color: var(--neon-pink);">0.000</div>
+        </div>
+      </div>
+
+      <!-- Simulation Speed Slider -->
+      <div class="speed-control">
+        <label>SPEED: </label>
+        <input type="range" id="speedSlider" class="speed-slider" min="1" max="100" value="5">
+        <span id="speedVal" class="speed-badge">5x</span>
+      </div>
+
+      <!-- Action Controls Bar -->
+      <div class="controls-bar">
+        <button id="btnPlayPause" class="btn btn-primary">
+          <span>⏸</span> PAUSE
+        </button>
+        <button id="btnStep" class="btn">
+          <span>⏯</span> STEP
+        </button>
+        <button id="btnReset" class="btn">
+          <span>🔄</span> RESET GAME
+        </button>
+        <button id="btnTurbo" class="btn">
+          <span>⚡</span> TURBO
+        </button>
+        <button id="btnManual" class="btn">
+          <span>🕹️</span> HUMAN PLAY
+        </button>
+      </div>
+    </section>
+
+    <!-- Right Column: Neural Graph Visualizer & Weight Matrix Heatmap -->
+    <section class="network-column">
+
+      <!-- Neural Synapse & Activation Graph -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🧠</span> NEURAL ARCHITECTURE & SYNAPTIC FIRING
+          </div>
+          <div class="legend">
+            <span class="legend-item"><span class="legend-dot" style="background: var(--neon-cyan);"></span> +Weight</span>
+            <span class="legend-item"><span class="legend-dot" style="background: var(--neon-pink);"></span> -Weight</span>
+            <span class="legend-item"><span class="legend-dot" style="background: var(--neon-yellow);"></span> Signal Pulse</span>
+          </div>
+        </div>
+        <div class="canvas-wrapper">
+          <canvas id="nnCanvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Live Weight Matrix Inspector & Gradient Deltas -->
+      <div class="card matrix-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📊</span> WEIGHT MATRIX &amp; LEARNING GRADIENTS
+          </div>
+          <div class="matrix-header-controls">
+            <!-- Layer Tabs -->
+            <button class="tab-btn matrix-tab active" data-layer="0">Layer 1 (18×12)</button>
+            <button class="tab-btn matrix-tab" data-layer="1">Layer 2 (12×18)</button>
+            <button class="tab-btn matrix-tab" data-layer="2">Output (3×12)</button>
+
+            <!-- Mode Tabs -->
+            <button class="tab-btn matrix-mode active" data-mode="weights">Weights (W)</button>
+            <button class="tab-btn matrix-mode" data-mode="deltas">Updates (|ΔW|)</button>
+            <button class="tab-btn matrix-mode" data-mode="biases">Biases (b)</button>
+          </div>
+        </div>
+        <div class="canvas-wrapper">
+          <canvas id="matrixCanvas"></canvas>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Lower Section: Analytics & Hyperparameters -->
+  <section class="bottom-grid">
+
+    <!-- Performance & Learning Trajectory Chart -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📈</span> LEARNING TRAJECTORY &amp; CONVERGENCE
+        </div>
+      </div>
+      <div class="canvas-wrapper">
+        <canvas id="chartCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Hyperparameters Cockpit & Model Management -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>⚙️</span> RL HYPERPARAMETERS &amp; MODEL VAULT
+        </div>
+        <div>
+          <span style="font-size: 11px; color: var(--text-muted);">Epsilon (ε): </span>
+          <span id="statEpsilon" style="font-family: var(--font-cyber); color: var(--neon-pink);">1.000</span>
+        </div>
+      </div>
+
+      <div class="param-grid">
+        <div class="param-item">
+          <label>Learning Rate (α): <span id="valLR" class="p-val">0.0010</span></label>
+          <input type="range" id="sliderLR" class="param-slider" min="0.0001" max="0.01" step="0.0001" value="0.001">
+        </div>
+
+        <div class="param-item">
+          <label>Discount Factor (γ): <span id="valGamma" class="p-val">0.95</span></label>
+          <input type="range" id="sliderGamma" class="param-slider" min="0.80" max="0.99" step="0.01" value="0.95">
+        </div>
+
+        <div class="param-item">
+          <label>Exploration (ε): <span id="valEpsilon" class="p-val">0.05</span></label>
+          <input type="range" id="sliderEpsilon" class="param-slider" min="0.0" max="1.0" step="0.01" value="0.05">
+        </div>
+
+        <div class="param-item">
+          <label>Food Reward: <span id="valFoodR" class="p-val">10</span></label>
+          <input type="range" id="sliderFoodR" class="param-slider" min="5" max="30" step="1" value="10">
+        </div>
+
+        <div class="param-item">
+          <label>Death Penalty: <span id="valDeathR" class="p-val">-10</span></label>
+          <input type="range" id="sliderDeathR" class="param-slider" min="-30" max="-2" step="1" value="-10">
+        </div>
+      </div>
+
+      <!-- Model Vault Actions -->
+      <div class="model-actions-row">
+        <button id="btnResetBrain" class="btn btn-danger">
+          <span>⚠️</span> RESET TO RANDOM
+        </button>
+        <button id="btnLoadPretrained" class="btn btn-primary">
+          <span>⭐</span> LOAD PRETRAINED BRAIN
+        </button>
+        <button id="btnExportModel" class="btn">
+          <span>💾</span> EXPORT WEIGHTS (JSON)
+        </button>
+        <button id="btnImportModel" class="btn">
+          <span>📂</span> IMPORT WEIGHTS
+        </button>
+        <input type="file" id="fileInputModel" accept=".json" style="display: none;">
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Core App Entry -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
+
